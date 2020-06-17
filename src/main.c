@@ -14,10 +14,6 @@ SDL_Texture* color_buffer_texture = NULL;
 int window_width = 800;
 int window_height = 600;
 
-void destroy_window();
-
-void clear_color_buffer(unsigned int i);
-
 bool initialize_window(void) {
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
 		fprintf(stderr, "Error initializing SDL.\n");
@@ -69,17 +65,6 @@ void setup(void) {
             window_width,
             window_height
     );
-
-/*    if (!color_buffer_texture) {
-        fprintf(stderr, "Error creating SDL texture.\n");
-        return false;
-    }*/
-
-    color_buffer[0] = 0xFFFF0000;
-    color_buffer[1] = 0xFF00FF00;
-    color_buffer[(window_width * 10) + 20] = 0xFFFF0000;
-    printf("%d\n", color_buffer[0]);
-    printf("%d\n", color_buffer[1]);
 }
 
 void process_input(void) {
@@ -110,6 +95,14 @@ void draw_grid(void) {
     }
 }
 
+void draw_rect(int x, int y, int width, int height, uint32_t color) {
+    for (int i = y; i < height; i++) {
+        for (int j = x; j < width; j++) {
+            color_buffer[window_width * i + j] = color;
+        }
+    }
+}
+
 void clear_color_buffer(uint32_t color) {
     for (int y = 0; y < window_height; y++) {
         for (int x = 0; x < window_width; x++) {
@@ -134,6 +127,7 @@ void render(void) {
     SDL_RenderClear(renderer);
 
     draw_grid();
+    draw_rect(100, 100, 500, 200, 0xFF0000FF);
 
     render_color_buffer();
     clear_color_buffer(0xFF000000);
