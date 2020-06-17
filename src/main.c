@@ -25,6 +25,12 @@ bool initialize_window(void) {
 		return false;
 	}
 
+	// Set width and height of the WSDL window with the max screen resolution
+	SDL_DisplayMode  display_mode;
+    SDL_GetCurrentDisplayMode(0, &display_mode);
+    window_width = display_mode.w;
+    window_height = display_mode.h;
+
 	// Create a SDL window
 	window = SDL_CreateWindow(
 		NULL,
