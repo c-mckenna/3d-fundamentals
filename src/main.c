@@ -1,9 +1,9 @@
-#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <SDL2/SDL.h>
 #include <stdlib.h>
 #include "display.h"
+#include "vector.h"
 
 bool is_running = false;
 
