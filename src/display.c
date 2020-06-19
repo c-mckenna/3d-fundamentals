@@ -16,7 +16,7 @@ bool initialize_window(void) {
         return false;
     }
 
-    // Set width and height of the WSDL window with the max screen resolution
+    // Set width and height of the SDL window with the max screen resolution
     SDL_DisplayMode  display_mode;
     SDL_GetCurrentDisplayMode(0, &display_mode);
     window_width = display_mode.w;
@@ -48,26 +48,28 @@ bool initialize_window(void) {
     return true;
 }
 
-void draw_pixel(int x, int y, uint32_t color) {
-    if (x < window_width && y < window_height) {
-        color_buffer[window_width * y + x] = color;
-    }
-}
-
 void draw_grid(void) {
     for (int y = 0; y < window_height; y++) {
         for (int x = 0; x < window_width; x++) {
             if (y % 10 == 0 || x % 10 == 0) {
-                draw_pixel(x, y, 0xFFFFFFFF);
+                draw_pixel(x, y, 0xFF262626);
             }
         }
     }
 }
 
+void draw_pixel(int x, int y, uint32_t color) {
+    if (x >= 0 && x < window_width && y >= 0 && y < window_height) {
+        color_buffer[window_width * y + x] = color;
+    }
+}
+
 void draw_rect(int x, int y, int width, int height, uint32_t color) {
-    for (int i = y; i < height; i++) {
-        for (int j = x; j < width; j++) {
-            draw_pixel(j, i, color);
+    for (int i = 0; i < width; i++) {
+        for (int j = 0; j < height; j++) {
+            int current_x = x + i;
+            int current_y = y + j;
+            draw_pixel(current_x, current_y, color);
         }
     }
 }
