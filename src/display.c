@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "display.h"
 
 SDL_Window* window = NULL;
@@ -51,7 +52,7 @@ bool initialize_window(void) {
 void draw_grid(void) {
     for (int y = 0; y < window_height; y++) {
         for (int x = 0; x < window_width; x++) {
-            if (y % 10 == 0 || x % 10 == 0) {
+            if (y % 20 == 0 || x % 20 == 0) {
                 draw_pixel(x, y, 0xFF262626);
             }
         }
@@ -72,6 +73,32 @@ void draw_rect(int x, int y, int width, int height, uint32_t color) {
             draw_pixel(current_x, current_y, color);
         }
     }
+}
+
+void draw_line(int x0, int y0, int x1, int y1, int32_t color) {
+    int delta_x = x1 - x0;
+    int delta_y = y1 - y0;
+
+    int longest_side_length = abs(delta_x) > abs(delta_y) ? abs(delta_x) : abs(delta_y);
+
+    // Find how much we should increment in both x and y each step
+    float x_inc = delta_x / (float)longest_side_length;
+    float y_inc = delta_y / (float)longest_side_length;
+
+    float current_x = x0;
+    float current_y = y0;
+
+    for (int i = 0; i <= longest_side_length; i++) {
+        draw_pixel(round(current_x), round(current_y), color);
+        current_x += x_inc;
+        current_y += y_inc;
+    }
+}
+
+void draw_triangle(int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color) {
+    draw_line(x0, y0, x1, y1, color);
+    draw_line(x1, y1, x2, y2, color);
+    draw_line(x2, y2, x0, y0, color);
 }
 
 void clear_color_buffer(uint32_t color) {
