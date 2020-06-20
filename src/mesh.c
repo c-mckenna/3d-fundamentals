@@ -1,6 +1,8 @@
 #include <stdio.h>
-#include "mesh.h"
+#include <string.h>
+#include <stdlib.h>
 #include "array.h"
+#include "mesh.h"
 
 mesh_t mesh = {
         .vertices = NULL,
@@ -48,4 +50,78 @@ void load_cube_mesh_data(void) {
     for (int i = 0; i < N_CUBE_FACES; i++) {
         array_push(mesh.faces, cube_faces[i]);
     }
+}
+
+void load_obj_file_data(char* filename) {
+    FILE* file = fopen(filename, "r");
+
+    char line[256];
+    while (fgets(line, sizeof(line), file)) {
+        if (line[1] == ' ') {
+            switch (line[0]) {
+                case 'v': {
+                    char* token = strtok(line, " ");
+                    int i = 0;
+                    float values[3];
+
+                    while (token) {
+                        if ((strcmp(token, "v") != 0)) {
+                            values[i++] = atof(token);
+                        }
+
+                        token = strtok(NULL, " ");
+                    }
+
+                    vec3_t vertex = {
+                            .x = values[0],
+                            .y = values[1],
+                            .z = values[2]
+                    };
+
+                    printf("Vertex\n");
+                    printf("%f, %f, %f\n", vertex.x, vertex.y, vertex.z);
+
+                    array_push(mesh.vertices, vertex);
+
+                    break;
+                }
+                case 'f': {
+                    char* token = strtok(line, " ");
+                    int i = 0;
+                    int values[3];
+
+                    while (token) {
+                        if ((strcmp(token, "f") != 0)) {
+                            if (strlen(token) > 0) {
+                                int length = strcspn(token, "/");
+                                char* index = malloc(length + 1);
+                                memcpy(index, token, length);
+                                index[length] = '\0';
+
+                                values[i++] = atoi(index);
+                                free(index);
+                            }
+                        }
+
+                        token = strtok(NULL, " ");
+                    }
+
+                    face_t face = {
+                            .a = values[0],
+                            .b = values[1],
+                            .c = values[2]
+                    };
+
+                    printf("Face\n");
+                    printf("%i, %i, %i\n", face.a, face.b, face.c);
+
+                    array_push(mesh.faces, face);
+
+                    break;
+                }
+            }
+        }
+    }
+
+    fclose(file);
 }
