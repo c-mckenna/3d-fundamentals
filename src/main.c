@@ -149,17 +149,35 @@ void update(void) {
             projected_points[j].y += (window_height / 2);
         }
 
+        // Calculate the average depth based on the vertices after transformation
+        float avg_depth = transformed_vertices[0].z + transformed_vertices[1].z + transformed_vertices[2].z / 3;
+
         triangle_t projected_triangle = {
                 .points = {
                         { projected_points[0].x, projected_points[0].y },
                         { projected_points[1].x, projected_points[1].y },
                         { projected_points[2].x, projected_points[2].y }
                 },
-                .color = mesh_face.color
+                .color = mesh_face.color,
+                .avg_depth = avg_depth
         };
 
         // Save the projected triangle in the array of triangles to render
         array_push(triangles_to_render, projected_triangle)
+    }
+
+    bool swapped = true;
+
+    while (swapped) {
+        swapped = false;
+        for (int i = 1; i < array_length(triangles_to_render) - 1; i++) {
+            if (triangles_to_render[i - 1].avg_depth < triangles_to_render[i].avg_depth) {
+                triangle_t tmp = triangles_to_render[i - 1];
+                triangles_to_render[i - 1] = triangles_to_render[i];
+                triangles_to_render[i] = tmp;
+                swapped = true;
+            }
+        }
     }
 }
 
