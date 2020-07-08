@@ -9,12 +9,12 @@
 #include "triangle.h"
 #include "array.h"
 #include "matrix.h"
+#include "math.h"
 
 triangle_t* triangles_to_render = NULL;
 
 vec3_t camera_position = { 0, 0, 0 };
-
-float fov_factor = 640;
+mat4_t proj_matrix;
 
 bool is_running = false;
 int previous_frame_time = 0;
@@ -35,6 +35,11 @@ void setup(void) {
             window_width,
             window_height
     );
+
+    // Initialize the perspective projection matrix
+    float fov = M_PI / 3.0; // 3.14(PI) 60 Degrees
+    float aspect = (float)window_height / window_width;
+    proj_matrix = mat4_make_perspective(fov, aspect, 0.1, 100.0);
 
     load_cube_mesh_data();
     // load_obj_file_data("assets/cube.obj");
@@ -65,14 +70,6 @@ void process_input(void) {
                 render_method = RENDER_FILL_TRIANGLE_WIRE;
 			break;
 	}
-}
-
-vec2_t project(vec3_t point) {
-    vec2_t projected_point = {
-        .x = (fov_factor * point.x) / point.z,
-        .y = (fov_factor * point.y) / point.z
-    };
-    return projected_point;
 }
 
 void update(void) {
@@ -155,14 +152,19 @@ void update(void) {
             }
         }
 
-        vec2_t projected_points[3];
+        vec4_t projected_points[3];
         // Loop all three vertices to perform projection
         for (int j = 0; j < 3; j++) {
-            projected_points[j] = project(vec3_from_vec4(transformed_vertices[j]));
+            // projected_points[j] = project(vec3_from_vec4(transformed_vertices[j]));
+            projected_points[j] = mat4_mul_vec4_project(proj_matrix, transformed_vertices[j]);
 
-            // Scale and translate projected point to the middle of the screen
-            projected_points[j].x += (window_width / 2);
-            projected_points[j].y += (window_height / 2);
+            // Scale into the view
+            projected_points[j].x *= (window_width / 2.0);
+            projected_points[j].y *= (window_height / 2.0);
+
+            // Translate projected point to the middle of the screen
+            projected_points[j].x += (window_width / 2.0);
+            projected_points[j].y += (window_height / 2.0);
         }
 
         // Calculate the average depth based on the vertices after transformation
